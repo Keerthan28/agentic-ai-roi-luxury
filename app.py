@@ -3,9 +3,7 @@ Agentic AI ROI Dashboard — Luxury Goods Industry
 Streamlit app with interactive OSINT parameter sliders and live ROI projections.
 """
 
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
-
+import os, pathlib
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -14,7 +12,12 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import joblib
 from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from xgboost import XGBRegressor
+
+# Resolve paths relative to this script, works both locally and on Streamlit Cloud
+APP_DIR = pathlib.Path(__file__).resolve().parent
 
 from model.pipeline import (
     DEFAULT_OSINT, VALID_VALUES, FEATURE_COLS, ORDERED_SCALES,
@@ -35,19 +38,32 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-    df_synth_raw = pd.read_excel('luxury_goods_synthetic_only_ai_positive.xlsx')
+    df_synth_raw = pd.read_excel(APP_DIR / 'luxury_goods_synthetic_only_ai_positive.xlsx')
     df_synth = clean_dataframe(df_synth_raw)
 
-    df_real_raw = pd.read_excel('Luxury Goods Shopping Experince_March 11, 2026_17.48.xlsx')
+    df_real_raw = pd.read_excel(APP_DIR / 'Luxury Goods Shopping Experince_March 11, 2026_17.48.xlsx')
     df_real = clean_dataframe(df_real_raw, drop_header_row=True)
     return df_synth, df_real
 
 @st.cache_resource
-def load_models():
-    return joblib.load('model/trained_models.joblib')
+def train_models(df_synth_raw):
+    """Train models on the fly — avoids joblib version mismatch on cloud."""
+    df = engineer_features(df_synth_raw)
+    X, y = df[FEATURE_COLS], df['net_roi']
+    models = {
+        'XGBoost': XGBRegressor(n_estimators=200, max_depth=5, learning_rate=0.1,
+                                 subsample=0.8, colsample_bytree=0.8, random_state=42, verbosity=0),
+        'Random Forest': RandomForestRegressor(n_estimators=200, max_depth=8,
+                                                min_samples_split=5, random_state=42, n_jobs=-1),
+        'Gradient Boosting': GradientBoostingRegressor(n_estimators=200, max_depth=5,
+                                                         learning_rate=0.1, subsample=0.8, random_state=42),
+    }
+    for model in models.values():
+        model.fit(X, y)
+    return models
 
 df_synth_raw, df_real_raw = load_data()
-models = load_models()
+models = train_models(df_synth_raw)
 
 # ── Sidebar: OSINT Parameter Controls ────────────────────────────────────
 
