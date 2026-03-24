@@ -115,17 +115,357 @@ df_real = engineer_features(df_real_raw, osint=osint)
 
 st.markdown("""
 # 💎 Agentic AI ROI Dashboard — Luxury Goods Industry
-**Interactive analysis of AI deployment ROI, powered by survey data and OSINT retention benchmarks.**
+**Interactive consulting for luxury brands: Agentic AI segmentation → use case match → ROI → roadmap.**
 """)
 
-# ── Tabs ──────────────────────────────────────────────────────────────────
+# ── Sidebar navigation for closed-loop workflow ─────────────────────────────
+page = st.sidebar.selectbox(
+    "Navigation",
+    ["Home Input", "Customer Segmentation", "Agentic AI Use Cases", "ROI Calculator", "Implementation Roadmap"],
+)
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Current State", "🚀 Forward Projection", "🔍 Segment Deep Dive", "📋 Executive Summary"
-])
+# User input definitions
+FEATURE_CHOICES = [
+    "High-spending (High AOV) customers",
+    "High-frequency repurchase customers",
+    "Luxury limited/rare item buyers",
+    "Omnichannel (online + offline) shoppers",
+    "High private domain/community engagement customers",
+    "Ultra-high-net-worth VIC/VIP clients",
+    "At-risk churn customers (long time no purchase)",
+    "Leather goods/jewelry/watch preference buyers",
+]
+PAIN_CHOICES = [
+    "Insufficient personalized service for high-value clients",
+    "Chaotic limited-edition product allocation & appointment",
+    "Low customer repurchase & retention rate",
+    "High customer service operational costs",
+    "Inconsistent omnichannel customer experience",
+    "Unfocused and inefficient luxury marketing",
+]
 
-# =====================================================================
-# TAB 1: CURRENT STATE
+def get_feature_df(df):
+    # from engineered data in model.pipeline
+    cols = [
+        'annual_spend', 'purchase_freq_weight', 'brand_count', 'digital_propensity',
+        'ai_usage_freq', 'clv', 'retention_improvement', 'satisfaction_score',
+    ]
+    return df[cols].fillna(0)
+
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
+USE_CASE_RULES = [
+    ("Ultra-High-Net-Worth Connoisseurs", "Insufficient personalized service for high-value clients", "AI Personal Luxury Concierge Agent", "Conversion +4%, AOV +8%, Labor -25%", 0.04, 0.08, 0.25),
+    ("Luxury Collectors", "Chaotic limited-edition product allocation & appointment", "Limited-Edition Allocation & Pre-Release Agent", "Conversion +6%, AOV +15%, Labor -15%", 0.06, 0.15, 0.15),
+    ("At-Risk Churn Customers", "Low customer repurchase & retention rate", "Customer Retention & Re-engagement Agent", "Conversion +2%, AOV +3%, Labor -10%", 0.02, 0.03, 0.10),
+    (None, "High customer service operational costs", "Intelligent Private Domain Operation Agent", "Conversion +3%, AOV +5%, Labor -30%", 0.03, 0.05, 0.30),
+    (None, "Inconsistent omnichannel customer experience", "Omnichannel Experience Synergy Agent", "Conversion +3%, AOV +5%, Labor -30%", 0.03, 0.05, 0.30),
+]
+
+if 'analysis' not in st.session_state:
+    st.session_state.analysis = {}
+
+
+def run_analysis(selected_features, selected_pains, annual_revenue):
+    df = df_real.copy()
+    feature_df = get_feature_df(df)
+    scaler = MinMaxScaler()
+    X = scaler.fit_transform(feature_df)
+
+    # Optimal cluster number via elbow method 3-5
+    inertias = []
+    for k in range(3, 6):
+        km = KMeans(n_clusters=k, random_state=42, n_init='auto').fit(X)
+        inertias.append(km.inertia_)
+    k_choices = [3, 4, 5]
+    deltas = np.diff(inertias)
+    if len(deltas) > 1:
+        best_idx = int(np.argmin(deltas))
+        n_clusters = k_choices[min(best_idx + 1, 2)]
+    else:
+        n_clusters = 3
+
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init='auto').fit(X)
+    df['cluster'] = kmeans.labels_
+
+    pca = PCA(n_components=2, random_state=42)
+    pca_coords = pca.fit_transform(X)
+    df['pc1'] = pca_coords[:, 0]
+    df['pc2'] = pca_coords[:, 1]
+
+    center_df = pd.DataFrame(scaler.inverse_transform(kmeans.cluster_centers_), columns=feature_df.columns)
+    by_score = []
+
+    for i, row in center_df.iterrows():
+        score_atrisk = 1 - row['retention_improvement']
+        score_uhnw = row['clv']
+        score_collectors = row['brand_count'] + row['annual_spend']
+        score_asp = row['ai_usage_freq'] + row['digital_propensity']
+        score_gift = row['satisfaction_score']
+        by_score.append((i, {
+            'At-Risk Churn Customers': score_atrisk,
+            'Ultra-High-Net-Worth Connoisseurs': score_uhnw,
+            'Luxury Collectors': score_collectors,
+            'Aspirational Luxury Buyers': score_asp,
+            'Gift-Oriented Luxury Purchasers': score_gift,
+        }))
+
+    cluster_name_map = {}
+    assigned = set()
+    for cid, scores in sorted(by_score, key=lambda t: -max(t[1].values())):
+        sorted_names = sorted(scores.items(), key=lambda x: -x[1])
+        for name, _ in sorted_names:
+            if name not in assigned:
+                cluster_name_map[cid] = name
+                assigned.add(name)
+                break
+
+    df['cluster_name'] = df['cluster'].map(cluster_name_map)
+
+    # Use case matching
+    matched = []
+    for target_seg, pain, case_name, desc, conv, aov, labor in USE_CASE_RULES:
+        seg_match = True if target_seg is None else target_seg in df['cluster_name'].unique()
+        pain_match = pain in selected_pains
+        if seg_match and pain_match:
+            matched.append({
+                'name': case_name,
+                'description': desc,
+                'conversion_lift': conv,
+                'aov_lift': aov,
+                'labor_saving': labor,
+            })
+
+    if not matched:
+        # fallback default
+        for _, pain, case_name, desc, conv, aov, labor in USE_CASE_RULES:
+            if pain in selected_pains:
+                matched.append({
+                    'name': case_name,
+                    'description': desc,
+                    'conversion_lift': conv,
+                    'aov_lift': aov,
+                    'labor_saving': labor,
+                })
+
+    conversion_lift = sum(item['conversion_lift'] for item in matched)
+    aov_lift = sum(item['aov_lift'] for item in matched)
+    labor_saving = sum(item['labor_saving'] for item in matched)
+
+    total_revenue_lift = annual_revenue * (conversion_lift + aov_lift)
+    total_cost_saving = annual_revenue * 0.15 * labor_saving
+    net_gain = total_revenue_lift + total_cost_saving
+    ai_implementation_cost = net_gain * 0.10
+    roi = (net_gain - ai_implementation_cost) / ai_implementation_cost if ai_implementation_cost > 0 else np.nan
+    payback_months = ai_implementation_cost / net_gain * 12 if net_gain > 0 else np.nan
+
+    # 3-year trend line forecast
+    years = [1, 2, 3]
+    trend = []
+    base_cost = ai_implementation_cost
+    for y in years:
+        growth = 1 + 0.12 * (y - 1)
+        trend.append({
+            'year': f'Year {y}',
+            'revenue_lift': total_revenue_lift * growth,
+            'cost_saving': total_cost_saving * growth,
+            'net_gain': net_gain * growth,
+            'roi': roi,
+        })
+
+    roadmap_template = []
+    if "Ultra-High-Net-Worth Connoisseurs" in df['cluster_name'].values:
+        roadmap_template = [
+            ("0-3 Months", "Data desensitization & integration; AI knowledge base; pilot concierge agent."),
+            ("3-6 Months", "Limited-edition allocation agent launch; VIC private domain service scaling."),
+            ("6-12 Months", "Full omnichannel synergy; multi-agent collaboration; ROI optimization."),
+        ]
+    elif "Aspirational Luxury Buyers" in df['cluster_name'].values or "Gift-Oriented Luxury Purchasers" in df['cluster_name'].values:
+        roadmap_template = [
+            ("0-3 Months", "Segmentation and personalization engine; scaled content & conversion workflow."),
+            ("3-6 Months", "Targeted campaigns, digital experience upgrades, loyalty pipeline."),
+            ("6-12 Months", "ROI scaling, repeat purchase programs, smart promotion automation."),
+        ]
+    else:
+        roadmap_template = [
+            ("0-3 Months", "Retention cohort tagging; re-engagement offer automation; special access triggers."),
+            ("3-6 Months", "AI reactivation campaigns; concierge touchpoints; loyalty events."),
+            ("6-12 Months", "Heatmap optimization; churn prediction; executive KPI review."),
+        ]
+
+    st.session_state.analysis = {
+        'df': df,
+        'cluster_name_map': cluster_name_map,
+        'inertias': inertias,
+        'kmeans_k': n_clusters,
+        'pca': pca,
+        'matched_use_cases': matched,
+        'annual_revenue': annual_revenue,
+        'conversion_lift': conversion_lift,
+        'aov_lift': aov_lift,
+        'labor_saving': labor_saving,
+        'total_revenue_lift': total_revenue_lift,
+        'total_cost_saving': total_cost_saving,
+        'net_gain': net_gain,
+        'ai_implementation_cost': ai_implementation_cost,
+        'roi': roi,
+        'payback_months': payback_months,
+        'trend': trend,
+        'roadmap': roadmap_template,
+        'selected_features': selected_features,
+        'selected_pains': selected_pains,
+    }
+
+# Home Input page
+if page == "Home Input":
+    st.header("Step 1: Customer Profile & Pain Point Input")
+    st.markdown("""
+    Provide luxury customer signal selections and business pain points. Annual revenue is used for ROI calibration.
+    """)
+
+    selected_features = st.multiselect("Customer Feature Selection", FEATURE_CHOICES)
+    selected_pains = st.multiselect("Core Business Pain Points Selection", PAIN_CHOICES)
+    annual_revenue = st.number_input("Brand Annual Sales/Revenue", min_value=0.0, value=5000000.0, step=10000.0, format="%.2f")
+
+    if st.button("Run Closed-Loop Consulting Analysis"):
+        if not selected_features:
+            st.warning("Please select at least one customer feature.")
+        elif not selected_pains:
+            st.warning("Please select at least one business pain point.")
+        else:
+            run_analysis(selected_features, selected_pains, annual_revenue)
+            st.success("Analysis complete. Navigate to other tabs via the sidebar.")
+
+    if st.session_state.analysis:
+        st.info("Analysis is ready. Navigate to Customer Segmentation, AI Use Cases, ROI Calculator and Implementation Roadmap.")
+    st.stop()
+
+# Customer Segmentation page
+if page == "Customer Segmentation":
+    st.header("Step 2: Customer Segmentation via K-Means")
+    if not st.session_state.analysis:
+        st.warning("Run the Home Input step first.")
+        st.stop()
+
+    analysis = st.session_state.analysis
+    df = analysis['df']
+    n_clusters = analysis['kmeans_k']
+
+    st.markdown(f"Optimal cluster count estimated as **{n_clusters}** using elbow method (3-5).")
+    cust_counts = df['cluster_name'].value_counts().reset_index()
+    cust_counts.columns = ['Segment', 'Count']
+    st.table(cust_counts)
+
+    fig_pca = px.scatter(df, x='pc1', y='pc2', color='cluster_name', size='clv',
+                         title='2D PCA Cluster Distribution', width=900, height=500)
+    st.plotly_chart(fig_pca, use_container_width=True)
+
+    # Radar per cluster
+    radar_data = []
+    for seg in df['cluster_name'].unique():
+        seg_df = df[df['cluster_name'] == seg]
+        radar_data.append({
+            'segment': seg,
+            'annual_spend': seg_df['annual_spend'].mean(),
+            'purchase_freq_weight': seg_df['purchase_freq_weight'].mean(),
+            'clv': seg_df['clv'].mean(),
+            'ai_usage_freq': seg_df['ai_usage_freq'].mean(),
+            'retention_improvement': seg_df['retention_improvement'].mean(),
+        })
+
+    radar_df = pd.DataFrame(radar_data)
+    if not radar_df.empty:
+        categories = ['annual_spend', 'purchase_freq_weight', 'clv', 'ai_usage_freq', 'retention_improvement']
+        fig = go.Figure()
+        for _, row in radar_df.iterrows():
+            fig.add_trace(go.Scatterpolar(
+                r=row[categories].values,
+                theta=[c.replace('_', ' ').title() for c in categories],
+                fill='toself',
+                name=row['segment'],
+            ))
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, radar_df[categories].max().max() * 1.1]),
+                angularaxis=dict(direction='clockwise')
+            ),
+            showlegend=True,
+            title='Cluster Feature Radar'
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    pie = px.pie(cust_counts, names='Segment', values='Count', title='Segment Proportion')
+    st.plotly_chart(pie, use_container_width=True)
+    st.stop()
+
+# Agentic AI Use Cases page
+if page == "Agentic AI Use Cases":
+    st.header("Step 3: Agentic AI Use Case Matching")
+    if not st.session_state.analysis:
+        st.warning("Run the Home Input step first.")
+        st.stop()
+
+    matched = st.session_state.analysis['matched_use_cases']
+    if not matched:
+        st.info("No use cases matched. Please refine pain points or segmentation.")
+        st.stop()
+
+    cols = st.columns(2)
+    for i, uc in enumerate(matched):
+        with cols[i % 2]:
+            st.markdown(f"### {uc['name']}")
+            st.markdown(f"**Benefits:** {uc['description']}")
+            st.markdown(f"- Conversion lift: {uc['conversion_lift']*100:.1f}%")
+            st.markdown(f"- AOV lift: {uc['aov_lift']*100:.1f}%")
+            st.markdown(f"- Labor saving: {uc['labor_saving']*100:.1f}%")
+    st.stop()
+
+# ROI Calculator page
+if page == "ROI Calculator":
+    st.header("Step 4: Customized ROI Calculation")
+    if not st.session_state.analysis:
+        st.warning("Run the Home Input step first.")
+        st.stop()
+
+    a = st.session_state.analysis
+    st.metric("Total Revenue Lift", f"${a['total_revenue_lift']:,.0f}")
+    st.metric("Total Cost Saving", f"${a['total_cost_saving']:,.0f}")
+    st.metric("Net Annual Gain", f"${a['net_gain']:,.0f}")
+    st.metric("AI Implementation Cost", f"${a['ai_implementation_cost']:,.0f}")
+    st.metric("ROI", f"{a['roi']:.2f}x")
+    st.metric("Payback Period", f"{a['payback_months']:.1f} months")
+
+    dfk = pd.DataFrame(a['trend'])
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=dfk['year'], y=dfk['revenue_lift'], name='Revenue Lift'))
+    fig.add_trace(go.Bar(x=dfk['year'], y=dfk['cost_saving'], name='Cost Saving'))
+    fig.add_trace(go.Line(x=dfk['year'], y=dfk['net_gain'], name='Net Gain'))
+    fig.update_layout(title='3-Year ROI Trend', yaxis_title='USD', width=900, height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.stop()
+
+# Implementation Roadmap page
+if page == "Implementation Roadmap":
+    st.header("Step 5: Auto-Generated Implementation Roadmap")
+    if not st.session_state.analysis:
+        st.warning("Run the Home Input step first.")
+        st.stop()
+
+    roadmap = st.session_state.analysis['roadmap']
+    st.table(pd.DataFrame(roadmap, columns=['Phase', 'Actions']))
+    st.markdown("### Risk Assessment & Mitigation")
+    st.markdown("- Data privacy risk: ensure strict desensitization and consent management.")
+    st.markdown("- Allocation risk: pilot limited-edition agent with controlled cohorts.")
+    st.markdown("- Retention risk: monitor at-risk churn signals weekly and trigger re-engagement.")
+    st.markdown("- Omnichannel risk: unify CRM and POS data streams before full deployment.")
+    st.stop()
+
+# End of new navigation pages
+
+# (Legacy tabs removed; new sidebar workflow drives experience.)
 # =====================================================================
 
 with tab1:
