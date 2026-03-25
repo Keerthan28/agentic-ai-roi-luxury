@@ -1,6 +1,7 @@
 """
 Agentic AI ROI Dashboard — Luxury Goods Industry
 Streamlit app with interactive OSINT parameter sliders and live ROI projections.
+Enhanced UI for beautiful and intuitive experience.
 """
 
 import os, pathlib
@@ -34,6 +35,166 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ── Custom CSS & Styling ───────────────────────────────────────────────────
+
+st.markdown("""
+<style>
+/* Theme Colors */
+:root {
+    --primary: #C41E3A;
+    --secondary: #1f1f1f;
+    --accent: #FFB81C;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --light: #F9FAFB;
+    --dark: #111827;
+}
+
+/* Overall styling */
+.main {
+    background-color: #FFFFFF;
+}
+
+/* Custom containers */
+.metric-card {
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #C41E3A;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.status-card {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #FECACA;
+}
+
+.success-card {
+    background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #86EFAC;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #7DD3FC;
+}
+
+/* Headers & Typography */
+h1, h2, h3 {
+    color: #111827;
+    font-weight: 700;
+}
+
+h1 {
+    border-bottom: 3px solid #C41E3A;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Tabs styling */
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+    border-bottom: 3px solid #C41E3A;
+    color: #C41E3A;
+    font-weight: 600;
+}
+
+/* Button styling */
+.stButton button {
+    background: linear-gradient(135deg, #C41E3A 0%, #9B1733 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(196, 30, 58, 0.3);
+}
+
+.stButton button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
+}
+
+/* Input fields */
+.stNumberInput input, .stSelectbox select, .stMultiSelect [role="listbox"] {
+    border-radius: 8px;
+    border: 2px solid #E5E7EB;
+    padding: 0.75rem;
+}
+
+/* Expanders */
+.streamlit-expander {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+}
+
+.streamlit-expanderHeader {
+    background-color: #F9FAFB;
+    border-radius: 8px;
+}
+
+/* Metric styling */
+.metric-container {
+    background: #F9FAFB;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+}
+
+/* Sidebar styling */
+.st-sidebar {
+    background: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%);
+}
+
+.st-sidebar .stNumberInput input {
+    background: white;
+}
+
+/* Progress indicator styling */
+.progress-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background: #F9FAFB;
+    border-radius: 8px;
+    border-left: 3px solid #E5E7EB;
+}
+
+.progress-step.active {
+    background: #FEF2F2;
+    border-left-color: #C41E3A;
+}
+
+.progress-step.completed {
+    background: #F0FDF4;
+    border-left-color: #10B981;
+}
+
+/* Section dividers */
+hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 2px solid #E5E7EB;
+}
+
+/* Data table styling */
+.dataframe {
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 # ── Load data & models (cached) ──────────────────────────────────────────
 
 @st.cache_data
@@ -64,6 +225,162 @@ def load_data():
         st.error("Please ensure Affluent_Plus_Sample_Data.csv, Mass_Affluent_Sample_Data.csv, and Mass_Market_Sample_Data.csv exist.")
         st.stop()
 
+# ── UI Helper Functions ──────────────────────────────────────────────────
+
+def show_metric_card(label, value, subtext="", icon="📊"):
+    """Display a styled metric card."""
+    st.markdown(f"""
+    <div class="metric-card">
+        <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">{label}</div>
+        <div style="font-size: 1.8rem; font-weight: bold; color: #111827;">{icon} {value}</div>
+        <div style="font-size: 0.8rem; color: #999; margin-top: 0.25rem;">{subtext}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def show_progress_steps(current_step):
+    """Display workflow progress indicator."""
+    steps = [
+        ("1️⃣", "Home Input", "Customer Profile"),
+        ("2️⃣", "Segmentation", "K-Means Clustering"),
+        ("3️⃣", "AI Use Cases", "Strategic Alignment"),
+        ("4️⃣", "ROI Calculator", "Financial Impact"),
+        ("5️⃣", "Roadmap", "Implementation Plan"),
+    ]
+    
+    st.sidebar.markdown("### 📍 Workflow Progress")
+    for i, (emoji, title, desc) in enumerate(steps, 1):
+        status_class = "active" if i == current_step else "completed" if i < current_step else ""
+        status_emoji = "✓" if i < current_step else emoji
+        st.sidebar.markdown(f"""
+        <div class="progress-step {status_class}">
+            <span>{status_emoji}</span>
+            <div>
+                <strong>{title}</strong>
+                <div style="font-size: 0.8rem; color: #666;">{desc}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+def render_section(title, icon="📌"):
+    """Create a styled section header."""
+    st.markdown(f"### {icon} {title}")
+    st.divider()
+
+def match_features_from_text(user_text, feature_list):
+    """
+    Intelligent text matching function that identifies which features/pain points
+    the user's typed description falls into using keyword matching and similarity.
+    
+    Args:
+        user_text: User's typed description
+        feature_list: List of features/pain points to match against
+        
+    Returns:
+        List of matched categories
+    """
+    if not user_text or not user_text.strip():
+        return []
+    
+    user_text_lower = user_text.lower()
+    matched = []
+    
+    # Define keyword mappings for each feature/pain point
+    keyword_mappings = {
+        # Customer Features
+        "High-spending (High AOV) customers": [
+            "high", "spending", "aov", "expensive", "premium", "luxury", "wealth", "rich",
+            "affluent", "high-value", "big spenders", "expensive purchases", "heavy",
+            "high transaction", "big ticket", "vip", "vip client", "high ticket"
+        ],
+        "High-frequency repurchase customers": [
+            "frequent", "repeat", "loyalty", "regular", "purchase", "recurrent", "habitual",
+            "steady", "consistent", "recurring", "repeat buyer", "loyal customer", "high volume"
+        ],
+        "Luxury limited/rare item buyers": [
+            "limited", "edition", "rare", "exclusive", "collector", "collectible", "premium",
+            "scarce", "sought-after", "hard to find", "limited edition", "exclusive items"
+        ],
+        "Omnichannel (online + offline) shoppers": [
+            "omnichannel", "online", "offline", "channel", "digital", "store", "web",
+            "mobile", "seamless", "cross-channel", "integrated", "multi-channel"
+        ],
+        "High private domain/community engagement customers": [
+            "community", "engagement", "private", "domain", "social", "network", "group",
+            "member", "community member", "engagement", "active", "social network", "brand community"
+        ],
+        "Ultra-high-net-worth VIC/VIP clients": [
+            "ultra", "high-net-worth", "hnw", "vip", "vic", "premium member", "elite",
+            "exclusive", "top tier", "high-value", "c-level", "executive", "wealthy", "ultra-high"
+        ],
+        "At-risk churn customers (long time no purchase)": [
+            "churn", "risk", "at-risk", "lapsed", "inactive", "lost", "dormant", "decline",
+            "decreasing", "no purchase", "long time", "last purchase", "inactive customer"
+        ],
+        "Leather goods/jewelry/watch preference buyers": [
+            "leather", "jewelry", "watch", "accessories", "luxury goods", "premium", "apparel",
+            "brand", "designer", "fashion", "goods", "product", "category"
+        ],
+        
+        # Pain Points
+        "Insufficient personalized service for high-value clients": [
+            "personalization", "personalized", "service", "customization", "custom", "tailored",
+            "individual", "specific", "high-value", "premium service", "personal attention",
+            "one-on-one", "dedicated", "bespoke"
+        ],
+        "Chaotic limited-edition product allocation & appointment": [
+            "allocation", "appointment", "limited", "chaos", "chaotic", "confusion", "management",
+            "scheduling", "booking", "product", "edition", "distribution", "fairness"
+        ],
+        "Low customer repurchase & retention rate": [
+            "retention", "repurchase", "repeat", "coming back", "loyalty", "retention rate",
+            "repeat purchase", "reduce churn", "keep", "maintain", "improve loyalty"
+        ],
+        "High customer service operational costs": [
+            "cost", "operational", "expensive", "labor", "efficiency", "overhead", "manual",
+            "workload", "team", "support", "reduce cost", "automate", "labor intensive"
+        ],
+        "Inconsistent omnichannel customer experience": [
+            "inconsistent", "omnichannel", "experience", "consistent", "channel", "touchpoint",
+            "online", "offline", "unified", "seamless", "integration", "experience"
+        ],
+        "Unfocused and inefficient luxury marketing": [
+            "marketing", "unfocused", "inefficient", "targeting", "campaign", "promotion",
+            "strategy", "ineffectiveness", "effectiveness", "roi", "luxury", "brand"
+        ],
+    }
+    
+    # Calculate match scores for each feature
+    feature_scores = {}
+    for feature in feature_list:
+        score = 0
+        keywords = keyword_mappings.get(feature, [])
+        
+        # Direct keyword matching
+        for keyword in keywords:
+            if keyword in user_text_lower:
+                score += 1
+                # Boost score for longer/more specific matches
+                if len(keyword.split()) > 1:
+                    score += 0.5
+        
+        # Bonus for feature name match
+        feature_lower = feature.lower()
+        if feature_lower in user_text_lower:
+            score += 2
+        
+        feature_scores[feature] = score
+    
+    # Return features with score > 0, sorted by score
+    matched_features = sorted(
+        [(f, s) for f, s in feature_scores.items() if s > 0],
+        key=lambda x: x[1],
+        reverse=True
+    )
+    
+    return [f for f, s in matched_features]
+
+# ── Load data ────────────────────────────────────────────────────────────
+
 
 def engineer_features_from_csv(df):
     """Create essential features from enriched customer CSV data."""
@@ -93,8 +410,20 @@ def engineer_features_from_csv(df):
     else:
         d['purchase_freq_weight'] = 0.6
     
-    # Satisfaction score (use available engagement metrics, default to medium)
-    d['satisfaction_score'] = 3.5
+# Satisfaction score (derive from purchase quality or digital profile if available)
+    if 'spd_bc_purchase_quality' in d.columns:
+        d['satisfaction_score'] = np.where(
+            d['spd_bc_purchase_quality'] >= 5, 4.5,
+            np.where(d['spd_bc_purchase_quality'] >= 4, 4.0,
+                     np.where(d['spd_bc_purchase_quality'] >= 3, 3.5, 3.0))
+        )
+    else:
+        d['satisfaction_score'] = (
+            3.0 + (d['digital_propensity'] - 0.25) * 1.5 + (d.get('brand_count', 2) / 20)
+        ).clip(1.0, 5.0)
+
+    # Normalize so bucketed behavior is possible
+    d['satisfaction_score'] = d['satisfaction_score'].clip(1.0, 5.0)
     
     # AI usage frequency (assume growing adoption based on digital propensity)
     d['ai_usage_freq'] = (d['digital_propensity'] * 3).clip(0, 3)
@@ -183,30 +512,40 @@ models = train_models(df_synth_raw)
 
 # ── Sidebar: OSINT Parameter Controls ────────────────────────────────────
 
-st.sidebar.markdown("# ⚙️ OSINT Parameters")
-st.sidebar.markdown("Adjust luxury industry benchmarks from open-source intelligence.")
+st.sidebar.markdown("---")
+st.sidebar.markdown("## ⚙️ OSINT Parameters")
+st.sidebar.markdown("*Adjust luxury industry benchmarks from open-source intelligence*")
 
-st.sidebar.markdown("### Customer Retention")
-baseline_ret = st.sidebar.slider("Baseline Retention Rate", 0.50, 0.99, 0.82, 0.01,
-                                  help="Avg luxury customer retention (Bain: ~82%)")
-ai_ret_uplift = st.sidebar.slider("AI Retention Uplift", 0.05, 0.35, 0.15, 0.01,
-                                   help="Max retention boost from AI personalization")
-clv_mult = st.sidebar.slider("CLV Multiplier (x annual spend)", 3.0, 15.0, 8.5, 0.5,
-                              help="Customer lifetime value as multiple of annual spend")
-churn_cost = st.sidebar.slider("Churn Cost Multiplier", 2.0, 12.0, 5.0, 0.5,
-                                help="Cost to acquire new customer vs retain existing")
+with st.sidebar.expander("📊 Customer Retention", expanded=True):
+    baseline_ret = st.slider("Baseline Retention Rate", 0.50, 0.99, 0.82, 0.01,
+                                  help="Avg luxury customer retention (Bain: ~82%)",
+                                  key="ret_1")
+    ai_ret_uplift = st.slider("AI Retention Uplift", 0.05, 0.35, 0.15, 0.01,
+                                   help="Max retention boost from AI personalization",
+                                   key="ret_2")
+    clv_mult = st.slider("CLV Multiplier (x annual spend)", 3.0, 15.0, 8.5, 0.5,
+                              help="Customer lifetime value as multiple of annual spend",
+                              key="ret_3")
+    churn_cost = st.slider("Churn Cost Multiplier", 2.0, 12.0, 5.0, 0.5,
+                                help="Cost to acquire new customer vs retain existing",
+                                key="ret_4")
 
-st.sidebar.markdown("### AI Revenue Impact")
-pers_lift = st.sidebar.slider("Personalization Revenue Lift", 0.05, 0.40, 0.20, 0.01,
-                               help="Revenue increase from AI personalization")
-ai_cost = st.sidebar.slider("AI Implementation Cost Ratio", 0.01, 0.15, 0.03, 0.005,
-                              help="AI cost as fraction of customer revenue")
+with st.sidebar.expander("🤖 AI Revenue Impact", expanded=True):
+    pers_lift = st.slider("Personalization Revenue Lift", 0.05, 0.40, 0.20, 0.01,
+                               help="Revenue increase from AI personalization",
+                               key="ai_1")
+    ai_cost = st.slider("AI Implementation Cost Ratio", 0.01, 0.15, 0.03, 0.005,
+                              help="AI cost as fraction of customer revenue",
+                              key="ai_2")
 
-st.sidebar.markdown("### Projection Settings")
-shift_rate = st.sidebar.slider("Annual AI Literacy Shift Rate", 0.05, 0.50, 0.25, 0.01,
-                                help="How fast AI literacy grows per year (OSINT: ~25-30%)")
-n_customers_proj = st.sidebar.slider("Projection Customer Base", 500, 10000, 1000, 500)
-projection_end = st.sidebar.slider("Projection End Year", 2028, 2035, 2030)
+with st.sidebar.expander("📈 Projection Settings", expanded=False):
+    shift_rate = st.slider("Annual AI Literacy Shift Rate", 0.05, 0.50, 0.25, 0.01,
+                                help="How fast AI literacy grows per year (OSINT: ~25-30%)",
+                                key="proj_1")
+    n_customers_proj = st.slider("Projection Customer Base", 500, 10000, 1000, 500,
+                                  key="proj_2")
+    projection_end = st.slider("Projection End Year", 2028, 2035, 2030,
+                                key="proj_3")
 
 osint = {
     'baseline_retention_rate': baseline_ret,
@@ -231,14 +570,21 @@ df_real = engineer_features_from_csv(df_real_raw)
 # ── Header ────────────────────────────────────────────────────────────────
 
 st.markdown("""
-# 💎 Agentic AI ROI Dashboard — Luxury Goods Industry
-**Interactive consulting for luxury brands: Agentic AI segmentation → use case match → ROI → roadmap.**
-""")
+<div style="text-align: center; padding: 2rem 0;">
+    <h1 style="font-size: 2.2rem; margin: 0; color: #C41E3A;">💎 Agentic AI ROI Dashboard</h1>
+    <p style="font-size: 1.1rem; color: #666; margin-top: 0.5rem;">Luxury Goods Industry Intelligence & ROI Analytics</p>
+    <p style="font-size: 0.9rem; color: #999;">Interactive consulting for luxury brands: Segmentation → Use Case Match → ROI → Roadmap</p>
+</div>
+""", unsafe_allow_html=True)
 
-# ── Sidebar navigation for closed-loop workflow ─────────────────────────────
-page = st.sidebar.selectbox(
-    "Navigation",
+st.divider()
+
+# ── Top navigation for closed-loop workflow ─────────────────────────────
+page = st.selectbox(
+    "📋 Navigation",
     ["Home Input", "Customer Segmentation", "Agentic AI Use Cases", "ROI Calculator", "Implementation Roadmap"],
+    help="Choose a section to navigate through the analysis workflow",
+    key="page"
 )
 
 # User input definitions
@@ -277,6 +623,89 @@ if 'analysis' not in st.session_state:
     st.session_state.analysis = {}
 
 
+def get_preview_customer_count(df, selected_features, selected_pains, allow_or_mode=False):
+    """
+    Get the count of customers matching the selected features for preview.
+    Returns: (matched_count, total_count, will_use_fallback, impact_details)
+    impact_details includes per-feature residuals and suggested change.
+    """
+    total_count = len(df)
+    if not selected_features:
+        return total_count, total_count, False, {
+            'per_feature': {},
+            'most_restrictive': None,
+            'or_mode_count': total_count
+        }
+
+    df_filtered = df.copy()
+    per_feature = {}
+    
+    feature_filters = {
+        "High-spending (High AOV) customers": lambda d: d['annual_spend'] >= d['annual_spend'].quantile(0.70),
+        "High-frequency repurchase customers": lambda d: d['purchase_freq_weight'] >= d['purchase_freq_weight'].quantile(0.65),
+        "Luxury limited/rare item buyers": lambda d: d['brand_count'] >= d['brand_count'].quantile(0.60),
+        "Omnichannel (online + offline) shoppers": lambda d: d['digital_propensity'] >= d['digital_propensity'].quantile(0.55),
+        "High private domain/community engagement customers": lambda d: d['ai_usage_freq'] >= d['ai_usage_freq'].quantile(0.65),
+        "Ultra-high-net-worth VIC/VIP clients": lambda d: d['clv'] >= d['clv'].quantile(0.75),
+        "At-risk churn customers (long time no purchase)": lambda d: d['retention_improvement'] <= d['retention_improvement'].quantile(0.35),
+        "Leather goods/jewelry/watch preference buyers": lambda d: d['satisfaction_score'] >= d['satisfaction_score'].quantile(0.55),
+    }
+
+    pain_filters = {
+        "Insufficient personalized service for high-value clients": feature_filters["Ultra-high-net-worth VIC/VIP clients"],
+        "Chaotic limited-edition product allocation & appointment": feature_filters["Luxury limited/rare item buyers"],
+        "Low customer repurchase & retention rate": feature_filters["At-risk churn customers (long time no purchase)"],
+        "High customer service operational costs": feature_filters["High private domain/community engagement customers"],
+        "Inconsistent omnichannel customer experience": feature_filters["Omnichannel (online + offline) shoppers"],
+        "Unfocused and inefficient luxury marketing": feature_filters["High-frequency repurchase customers"],
+    }
+
+    # Cumulative AND filtering for strict match
+    for feature in selected_features:
+        if feature in feature_filters:
+            filter_func = feature_filters[feature]
+            mask = filter_func(df_filtered)
+            df_filtered = df_filtered[mask].copy()
+            per_feature[f"feature:{feature}"] = len(df_filtered)
+
+    for pain in selected_pains:
+        if pain in pain_filters:
+            filter_func = pain_filters[pain]
+            mask = filter_func(df_filtered)
+            df_filtered = df_filtered[mask].copy()
+            per_feature[f"pain:{pain}"] = len(df_filtered)
+
+    and_count = len(df_filtered)
+
+    # OR mode count-to-provide fallback suggestions
+    or_count = and_count
+    if allow_or_mode and selected_features:
+        union_df = pd.DataFrame(columns=df.columns)
+        for feature in selected_features:
+            if feature in feature_filters:
+                feature_df = df[feature_filters[feature](df)]
+                union_df = pd.concat([union_df, feature_df])
+        or_count = len(union_df.drop_duplicates())
+
+    min_cohort_size = max(50, total_count * 0.05)
+    will_fallback = and_count < min_cohort_size
+
+    if per_feature:
+        most_restrictive_feature = min(per_feature, key=per_feature.get)
+    else:
+        most_restrictive_feature = None
+
+    impact_details = {
+        'per_feature': per_feature,
+        'most_restrictive': most_restrictive_feature,
+        'and_count': and_count,
+        'or_count': or_count,
+        'min_cohort_size': min_cohort_size,
+    }
+
+    return and_count, total_count, will_fallback, impact_details
+
+
 def filter_dataset_by_customer_features(df, selected_features):
     """
     Dynamically filter dataset based on selected customer features.
@@ -291,16 +720,25 @@ def filter_dataset_by_customer_features(df, selected_features):
     
     # Define feature → filtering criteria mapping
     feature_filters = {
-        "High-spending (High AOV) customers": lambda d: d['annual_spend'] > d['annual_spend'].quantile(0.70),
-        "High-frequency repurchase customers": lambda d: d['purchase_freq_weight'] > d['purchase_freq_weight'].quantile(0.70),
-        "Luxury limited/rare item buyers": lambda d: d['brand_count'] > d['brand_count'].quantile(0.60),
-        "Omnichannel (online + offline) shoppers": lambda d: d['digital_propensity'] > d['digital_propensity'].quantile(0.65),
-        "High private domain/community engagement customers": lambda d: d['ai_usage_freq'] > d['ai_usage_freq'].quantile(0.70),
-        "Ultra-high-net-worth VIC/VIP clients": lambda d: d['clv'] > d['clv'].quantile(0.80),
-        "At-risk churn customers (long time no purchase)": lambda d: d['retention_improvement'] < d['retention_improvement'].quantile(0.30),
-        "Leather goods/jewelry/watch preference buyers": lambda d: d['satisfaction_score'] > d['satisfaction_score'].quantile(0.65),
+        "High-spending (High AOV) customers": lambda d: d['annual_spend'] >= d['annual_spend'].quantile(0.70),
+        "High-frequency repurchase customers": lambda d: d['purchase_freq_weight'] >= d['purchase_freq_weight'].quantile(0.65),
+        "Luxury limited/rare item buyers": lambda d: d['brand_count'] >= d['brand_count'].quantile(0.60),
+        "Omnichannel (online + offline) shoppers": lambda d: d['digital_propensity'] >= d['digital_propensity'].quantile(0.55),
+        "High private domain/community engagement customers": lambda d: d['ai_usage_freq'] >= d['ai_usage_freq'].quantile(0.65),
+        "Ultra-high-net-worth VIC/VIP clients": lambda d: d['clv'] >= d['clv'].quantile(0.75),
+        "At-risk churn customers (long time no purchase)": lambda d: d['retention_improvement'] <= d['retention_improvement'].quantile(0.35),
+        "Leather goods/jewelry/watch preference buyers": lambda d: d['satisfaction_score'] >= d['satisfaction_score'].quantile(0.55),
     }
-    
+
+    pain_filters = {
+        "Insufficient personalized service for high-value clients": feature_filters["Ultra-high-net-worth VIC/VIP clients"],
+        "Chaotic limited-edition product allocation & appointment": feature_filters["Luxury limited/rare item buyers"],
+        "Low customer repurchase & retention rate": feature_filters["At-risk churn customers (long time no purchase)"],
+        "High customer service operational costs": feature_filters["High private domain/community engagement customers"],
+        "Inconsistent omnichannel customer experience": feature_filters["Omnichannel (online + offline) shoppers"],
+        "Unfocused and inefficient luxury marketing": feature_filters["High-frequency repurchase customers"],
+    }
+
     # Apply filters cumulatively (AND logic)
     for feature in selected_features:
         if feature in feature_filters:
@@ -308,6 +746,13 @@ def filter_dataset_by_customer_features(df, selected_features):
             mask = filter_func(df_filtered)
             df_filtered = df_filtered[mask].copy()
             applied_filters.append(feature)
+
+    for pain in selected_pains:
+        if pain in pain_filters:
+            filter_func = pain_filters[pain]
+            mask = filter_func(df_filtered)
+            df_filtered = df_filtered[mask].copy()
+            applied_filters.append("pain:" + pain)
     
     # Fallback: If filtering eliminates too many customers, use full dataset
     min_cohort_size = max(50, len(df) * 0.05)  # At least 50 customers or 5% of dataset
@@ -499,33 +944,307 @@ def run_analysis(selected_features, selected_pains, annual_revenue):
 
 # Home Input page
 if page == "Home Input":
-    st.header("Step 1: Customer Profile & Pain Point Input")
-    st.markdown("""
-    Provide luxury customer signal selections and business pain points. Annual revenue is used for ROI calibration.
-    """)
+    show_progress_steps(1)
+    
+    st.markdown("### 📌 Step 1: Customer Profile & Pain Point Input")
+    st.markdown("*Provide luxury customer signal selections and business pain points. Annual revenue is used for ROI calibration.*")
+    st.divider()
+    
+    # Add tabs for two input methods
+    tab1, tab2 = st.tabs(["📋 Structured Input", "✍️ Smart Text Input"])
+    
+    # Initialize session state for selections
+    if 'auto_selected_features' not in st.session_state:
+        st.session_state.auto_selected_features = []
+    if 'auto_selected_pains' not in st.session_state:
+        st.session_state.auto_selected_pains = []
+    if 'input_method' not in st.session_state:
+        st.session_state.input_method = 'structured'
+    
+    # ─────────────────────────────────────────────────────────────────
+    # TAB 1: STRUCTURED INPUT (Original method)
+    # ─────────────────────────────────────────────────────────────────
+    with tab1:
+        st.markdown("**Method 1: Select from predefined options**")
+        st.markdown("Choose the customer profiles and pain points that match your business.")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("#### 👥 Customer Features")
+            st.markdown("Select 1-3 key customer profiles that matter most to your business:")
+            structured_features = st.multiselect(
+                "Customer Feature Selection", 
+                FEATURE_CHOICES,
+                label_visibility="collapsed",
+                help="Choose customer segments you want to focus on",
+                key="structured_features"
+            )
+            
+            if structured_features:
+                st.caption(f"✓ {len(structured_features)} feature(s) selected")
 
-    selected_features = st.multiselect("Customer Feature Selection", FEATURE_CHOICES)
-    selected_pains = st.multiselect("Core Business Pain Points Selection", PAIN_CHOICES)
-    annual_revenue = st.number_input("Brand Annual Sales/Revenue", min_value=0.0, value=5000000.0, step=10000.0, format="%.2f")
+        with col2:
+            st.markdown("#### 💼 Business Pain Points")
+            st.markdown("Select 1-3 operational challenges to address:")
+            structured_pains = st.multiselect(
+                "Core Business Pain Points Selection", 
+                PAIN_CHOICES,
+                label_visibility="collapsed",
+                help="Choose the business challenges you face",
+                key="structured_pains"
+            )
+            
+            if structured_pains:
+                st.caption(f"✓ {len(structured_pains)} pain point(s) selected")
+    
+    # ─────────────────────────────────────────────────────────────────
+    # TAB 2: SMART TEXT INPUT (New feature)
+    # ─────────────────────────────────────────────────────────────────
+    with tab2:
+        st.markdown("**Method 2: Describe in your own words**")
+        st.markdown("Write a description of your customer types and business challenges. The AI will automatically identify matching categories.")
+        
+        col1, col2 = st.columns([1.5, 1])
+        
+        with col1:
+            st.markdown("#### 📝 Customer Description")
+            customer_desc = st.text_area(
+                "Describe your target customers",
+                height=120,
+                placeholder="Example: We focus on ultra-high-net-worth VIP clients who make expensive purchases and are very engaged with our brand community. They are frequent luxury buyers looking for exclusive limited edition items.",
+                help="Be as descriptive as possible for better matching",
+                key="customer_description"
+            )
+            
+            if customer_desc:
+                # Auto-detect features from description
+                auto_features = match_features_from_text(customer_desc, FEATURE_CHOICES)
+                if auto_features:
+                    st.markdown("**🎯 Detected Customer Features:**")
+                    cols = st.columns(len(auto_features) if len(auto_features) <= 3 else 3)
+                    for idx, feature in enumerate(auto_features[:3]):
+                        with cols[idx % 3]:
+                            st.markdown(f"✓ {feature}")
+                    if len(auto_features) > 3:
+                        st.caption(f"+ {len(auto_features) - 3} more matches")
+                else:
+                    st.info("💡 No customer features matched yet. Try being more specific about your customer types.")
+        
+        with col2:
+            st.markdown("#### 🔧 Pain Points Description")
+            pain_desc = st.text_area(
+                "Describe your business challenges",
+                height=120,
+                placeholder="Example: We struggle with high customer service costs and inconsistent experience across online and offline channels. Limited edition product allocation is chaotic and our retention rates are declining.",
+                help="Describe the operational or business challenges you face",
+                key="pain_description"
+            )
+            
+            if pain_desc:
+                # Auto-detect pain points from description
+                auto_pains = match_features_from_text(pain_desc, PAIN_CHOICES)
+                if auto_pains:
+                    st.markdown("**🎯 Detected Pain Points:**")
+                    cols = st.columns(len(auto_pains) if len(auto_pains) <= 3 else 3)
+                    for idx, pain in enumerate(auto_pains[:3]):
+                        with cols[idx % 3]:
+                            st.markdown(f"✓ {pain}")
+                    if len(auto_pains) > 3:
+                        st.caption(f"+ {len(auto_pains) - 3} more matches")
+                else:
+                    st.info("💡 No pain points matched yet. Try being more specific about your challenges.")
+        
+        st.divider()
+        
+        # Save auto-detected selections
+        if customer_desc or pain_desc:
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                if st.button("✅ Use Detected Categories", use_container_width=True):
+                    st.session_state.auto_selected_features = auto_features if customer_desc else []
+                    st.session_state.auto_selected_pains = auto_pains if pain_desc else []
+                    st.session_state.input_method = 'smart'
+                    st.success("✓ Categories updated!")
+            
+            with col2:
+                if st.session_state.auto_selected_features or st.session_state.auto_selected_pains:
+                    st.caption(
+                        f"📌 Using: {len(st.session_state.auto_selected_features)} features, "
+                        f"{len(st.session_state.auto_selected_pains)} pain points"
+                    )
+    
+    st.divider()
+    
+    # Determine which selections to use
+    if st.session_state.input_method == 'smart':
+        selected_features = st.session_state.auto_selected_features
+        selected_pains = st.session_state.auto_selected_pains
+    else:
+        selected_features = structured_features
+        selected_pains = structured_pains
+    
+    st.markdown("#### 💰 Business Metrics")
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        annual_revenue = st.number_input(
+            "Brand Annual Sales/Revenue", 
+            min_value=0.0, 
+            value=5000000.0, 
+            step=10000.0, 
+            format="%.2f",
+            help="Used for ROI calculations and revenue impact projections"
+        )
+        st.caption(f"Revenue: ${annual_revenue:,.0f}")
+    
+    with col2:
+        st.metric("Expected Impact", "Up to 20% ROI")
+    
+    st.divider()
+    
+    # Smart Validation Preview - Real-time customer count indicator
+    st.markdown("#### 🔍 Customer Match Preview")
 
-    if st.button("Run Closed-Loop Consulting Analysis"):
-        if not selected_features:
-            st.warning("Please select at least one customer feature.")
-        elif not selected_pains:
-            st.warning("Please select at least one business pain point.")
-        else:
-            run_analysis(selected_features, selected_pains, annual_revenue)
-            st.success("Analysis complete. Navigate to other tabs via the sidebar.")
+    allow_or_mode = st.checkbox(
+        "Enable broader OR-based matching suggestion", False,
+        help="Show comparison of strict AND cohort and broader OR cohort to guide selection adjustments"
+    )
 
+    matched_count, total_count, will_fallback, impact = get_preview_customer_count(
+        df_real.copy(), selected_features, selected_pains, allow_or_mode=allow_or_mode
+    )
+
+    safe_threshold = 500  # Green zone
+    warning_threshold = 50  # Below this is red
+
+    if matched_count >= safe_threshold:
+        status_color = "🟢"
+        status_label = "EXCELLENT"
+        status_description = f"✅ {matched_count:,} customers match your selections"
+        suggestion = "Your selections are well-targeted. Analysis will be comprehensive."
+    elif matched_count >= warning_threshold:
+        status_color = "🟡"
+        status_label = "CAUTION"
+        status_description = f"⚠️ {matched_count:,} customers match your selections"
+        suggestion = "Acceptable but tight. Consider broadening 1 filter for more comprehensive analysis."
+    else:
+        status_color = "🔴"
+        status_label = "TOO RESTRICTIVE"
+        status_description = f"❌ Only {matched_count:,} customers match your selections"
+        suggestion = "Your filters are too restrictive for meaningful analysis. Try removing one feature or pain point."
+
+    col1, col2, col3 = st.columns([1, 2, 2])
+
+    with col1:
+        st.markdown(f"### {status_color}")
+        st.caption(status_label)
+
+    with col2:
+        st.markdown(f"**{status_description}**")
+        st.caption(f"Out of {total_count:,} total customers")
+
+    with col3:
+        st.info(f"💡 **Tip:** {suggestion}")
+
+    # Show OR-mode impact guidance if enabled
+    if allow_or_mode and selected_features:
+        st.info(
+            f"By OR-matching selected features, you could address up to {impact['or_count']:,} potential customers. "
+            "Use this as a soft target when AND is too restrictive."
+        )
+
+    # Show feature-level restriction details for zero/tiny match
+    if matched_count < warning_threshold and selected_features:
+        st.markdown("#### ⚙️ Filter Impact Breakdown")
+        if impact['per_feature']:
+            rows = []
+            for f, c in impact['per_feature'].items():
+                rows.append(f"• {f}: {c:,} customers remain")
+            st.markdown("\n".join(rows))
+            if impact['most_restrictive']:
+                st.warning(
+                    f"Most restrictive selection: '{impact['most_restrictive']}' (only {impact['per_feature'][impact['most_restrictive']]:,} customers remain). "
+                    "Consider removing it to grow the cohort."
+                )
+
+    if will_fallback:
+        st.warning(
+            f"⚠️ Note: {matched_count:,} customers is below the fallback threshold ({impact['min_cohort_size']:,}). "
+            f"Analysis will use full dataset ({total_count:,}) for stable clustering.",
+            icon="⚠️"
+        )
+    
+    st.divider()
+    
+    col1, col2, col3 = st.columns([1, 1, 2])
+    
+    with col1:
+        if st.button("🚀 Run Analysis", type="primary", use_container_width=True):
+            if not selected_features:
+                st.warning("⚠️ Please select at least one customer feature.")
+            elif not selected_pains:
+                st.warning("⚠️ Please select at least one business pain point.")
+            elif matched_count == 0:
+                st.error("❌ No customers match your current filters. Remove or relax one feature and try again.")
+            elif matched_count < 50:
+                st.warning(
+                    f"⚠️ Only {matched_count:,} customers match. Analysis may be unstable. "
+                    "Consider relaxing filters or enabling OR-based best-fit mode."
+                )
+                if st.button("✅ Proceed with limited cohort", use_container_width=True):
+                    with st.spinner("🔄 Running analysis... this may take a moment"):
+                        run_analysis(selected_features, selected_pains, annual_revenue)
+                    st.success("✅ Analysis complete! Navigate to other tabs via the sidebar to view results.")
+            else:
+                with st.spinner("🔄 Running analysis... this may take a moment"):
+                    run_analysis(selected_features, selected_pains, annual_revenue)
+                st.success("✅ Analysis complete! Navigate to other tabs via the sidebar to view results.")
+    with col2:
+        st.button("📖 View Guide", use_container_width=True, disabled=True)
+    
     if st.session_state.analysis:
-        st.info("Analysis is ready. Navigate to Customer Segmentation, AI Use Cases, ROI Calculator and Implementation Roadmap.")
+        col3.info("✓ Analysis history available for review")
+    
+    st.divider()
+    
+    # Help section
+    with st.expander("❓ How to Use This Dashboard", expanded=False):
+        st.markdown("""
+        **Welcome to the Agentic AI ROI Dashboard!**
+        
+        This interactive tool helps luxury brands understand the impact of AI-powered customer operations.
+        
+        **Two Input Methods:**
+        - **Structured Input**: Use predefined dropdown lists for maximum accuracy
+        - **Smart Text Input**: Describe your customers and challenges in your own words - AI automatically identifies matching categories
+        
+        **Workflow:**
+        1. **Home Input** (You are here) - Define your customer profiles and business challenges
+        2. **Customer Segmentation** - Understand your customer base through AI clustering
+        3. **AI Use Cases** - Discover AI applications aligned to your business
+        4. **ROI Calculator** - Review financial projections and ROI 
+        5. **Implementation Roadmap** - Get a phased deployment plan
+        
+        **Tips:**
+        - Select 1-3 features that best represent your target customers
+        - Choose 1-3 pain points you want to address
+        - For Smart Text Input, be descriptive about your specific situation
+        - Enter your actual annual revenue for accurate ROI projections
+        - The analysis typically takes 10-30 seconds
+        """)
+    
     st.stop()
 
 # Customer Segmentation page
 if page == "Customer Segmentation":
-    st.header("Step 2: Customer Segmentation via K-Means Clustering")
+    show_progress_steps(2)
+    
+    st.markdown("### 📊 Step 2: Customer Segmentation Analysis")
+    st.markdown("*K-Means clustering reveals natural customer groupings in your database*")
+    
     if not st.session_state.analysis:
-        st.warning("Run the Home Input step first.")
+        st.error("❌ Please run the Home Input analysis first.", icon="❌")
         st.stop()
 
     analysis = st.session_state.analysis
@@ -892,22 +1611,27 @@ if page == "Customer Segmentation":
                     pass
     
     st.dataframe(summary_display, use_container_width=True, hide_index=True)
-
     st.stop()
 
 # Agentic AI Use Cases page
 if page == "Agentic AI Use Cases":
-    st.header("Step 3: Strategic Agentic AI Use Case Alignment")
+    show_progress_steps(3)
+    
+    st.markdown("### 🤖 Step 3: Strategic Agentic AI Use Case Alignment")
+    st.markdown("*Discover AI applications matched to your customer segments and business challenges*")
+    
     if not st.session_state.analysis:
-        st.warning("Run the Home Input step first.")
+        st.error("❌ Please run the Home Input analysis first.", icon="❌")
         st.stop()
 
     matched = st.session_state.analysis['matched_use_cases']
     annual_rev = st.session_state.analysis['annual_revenue']
     
     if not matched:
-        st.info("No use cases matched. Please refine pain points or segmentation.")
+        st.warning("⚠️ No use cases matched. Please refine pain points or segmentation.")
         st.stop()
+
+    st.divider()
 
     st.markdown("""
     ### Executive Summary: Data-Driven Agent Deployment
@@ -1085,38 +1809,201 @@ if page == "Agentic AI Use Cases":
 
 # ROI Calculator page
 if page == "ROI Calculator":
-    st.header("Step 4: Customized ROI Calculation")
+    show_progress_steps(4)
+    
+    st.markdown("### 💰 Step 4: ROI Analysis & Financial Projections")
+    st.markdown("*Detailed breakdown of financial impact and ROI metrics*")
+    
     if not st.session_state.analysis:
-        st.warning("Run the Home Input step first.")
+        st.error("❌ Please run the Home Input analysis first.", icon="❌")
         st.stop()
 
     a = st.session_state.analysis
-    st.metric("Total Revenue Lift", f"${a['total_revenue_lift']:,.0f}")
-    st.metric("Total Cost Saving", f"${a['total_cost_saving']:,.0f}")
-    st.metric("Net Annual Gain", f"${a['net_gain']:,.0f}")
-    st.metric("AI Implementation Cost", f"${a['ai_implementation_cost']:,.0f}")
-    st.metric("ROI", f"{a['roi']:.2f}x")
-    st.metric("Payback Period", f"{a['payback_months']:.1f} months")
+    st.divider()
+    
+    # Key metrics cards
+    st.markdown("#### 📈 Key Financial Metrics")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(
+            "💰 Total Revenue Lift",
+            f"${a['total_revenue_lift']:,.0f}",
+            f"Year 1 impact",
+            delta_color="off"
+        )
+    with col2:
+        st.metric(
+            "💸 Total Cost Savings",
+            f"${a['total_cost_saving']:,.0f}",
+            f"Operational efficiency",
+            delta_color="off"
+        )
+    with col3:
+        st.metric(
+            "📊 Net Annual Gain",
+            f"${a['net_gain']:,.0f}",
+            f"Combined impact",
+            delta_color="off"
+        )
+    
+    st.divider()
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric(
+            "💻 AI Implementation Cost",
+            f"${a['ai_implementation_cost']:,.0f}",
+            "Year 1 investment"
+        )
+    with col2:
+        st.metric(
+            "🎯 ROI",
+            f"{a['roi']:.2f}x",
+            "Return multiple"
+        )
+    with col3:
+        st.metric(
+            "⏰ Payback Period",
+            f"{a['payback_months']:.1f} months",
+            f"Time to ROI"
+        )
+    with col4:
+        roi_pct = (a['roi'] * 100)
+        st.metric(
+            "📈 ROI %",
+            f"{roi_pct:.0f}%",
+            "Percentage return"
+        )
 
+    st.divider()
+    
+    # 3-Year trend visualization
+    st.markdown("#### 📊 3-Year Financial Projection")
+    
     dfk = pd.DataFrame(a['trend'])
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=dfk['year'], y=dfk['revenue_lift'], name='Revenue Lift'))
-    fig.add_trace(go.Bar(x=dfk['year'], y=dfk['cost_saving'], name='Cost Saving'))
-    fig.add_trace(go.Line(x=dfk['year'], y=dfk['net_gain'], name='Net Gain'))
-    fig.update_layout(title='3-Year ROI Trend', yaxis_title='USD', width=900, height=500)
+    fig.add_trace(go.Bar(
+        x=dfk['year'], 
+        y=dfk['revenue_lift'], 
+        name='Revenue Lift',
+        marker_color='#10B981',
+        hovertemplate='<b>%{x}</b><br>Revenue Lift: $%{y:,.0f}<extra></extra>'
+    ))
+    fig.add_trace(go.Bar(
+        x=dfk['year'], 
+        y=dfk['cost_saving'], 
+        name='Cost Savings',
+        marker_color='#3B82F6',
+        hovertemplate='<b>%{x}</b><br>Cost Savings: $%{y:,.0f}<extra></extra>'
+    ))
+    fig.add_trace(go.Scatter(
+        x=dfk['year'], 
+        y=dfk['net_gain'], 
+        name='Net Gain',
+        mode='lines+markers',
+        line=dict(color='#C41E3A', width=3),
+        marker=dict(size=10),
+        hovertemplate='<b>%{x}</b><br>Net Gain: $%{y:,.0f}<extra></extra>'
+    ))
+    fig.update_layout(
+        title='3-Year ROI Trend Analysis',
+        yaxis_title='USD ($)',
+        xaxis_title='Timeline',
+        height=500,
+        hovermode='x unified',
+        template='plotly_white'
+    )
+    fig.update_yaxes(tickformat='$,.0f')
     st.plotly_chart(fig, use_container_width=True)
-
+    
+    st.divider()
+    
+    # Investment breakdown
+    st.markdown("#### 💡 Investment Breakdown")
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        breakdown_data = {
+            'Component': ['Implementation Cost', 'Revenue Lift', 'Cost Savings'],
+            'Amount': [
+                a['ai_implementation_cost'],
+                a['total_revenue_lift'],
+                a['total_cost_saving']
+            ]
+        }
+        breakdown_df = pd.DataFrame(breakdown_data)
+        
+        fig_pie = px.pie(
+            breakdown_df,
+            values='Amount',
+            names='Component',
+            title='Financial Impact Distribution',
+            color_discrete_map={
+                'Implementation Cost': '#EF4444',
+                'Revenue Lift': '#10B981',
+                'Cost Savings': '#3B82F6'
+            }
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Financial Summary**")
+        
+        summary_text = f"""
+        **Implementation Investment:** ${a['ai_implementation_cost']:,.0f}
+        
+        **Year 1 Revenue Generation:** ${a['total_revenue_lift']:,.0f}
+        
+        **Year 1 Operational Savings:** ${a['total_cost_saving']:,.0f}
+        
+        **Net Year 1 Benefit:** ${a['net_gain']:,.0f}
+        
+        **Return on Investment:** {a['roi']:.2f}x ({roi_pct:.0f}%)
+        
+        **Time to Break Even:** {a['payback_months']:.1f} months
+        
+        **3-Year Total Benefit:** ${sum([x['net_gain'] for x in a['trend']]):,.0f}
+        """
+        
+        st.info(summary_text)
+    
+    st.divider()
+    
+    with st.expander("📝 Assumptions & Methodology", expanded=False):
+        st.markdown("""
+        **ROI Calculation Methodology:**
+        
+        - **Revenue Lift** = Annual Revenue × (Conversion Lift + AOV Lift)
+        - **Cost Savings** = Annual Revenue × 15% × Labor Savings
+        - **Net Gain** = Revenue Lift + Cost Savings
+        - **ROI** = (Net Gain - Implementation Cost) / Implementation Cost
+        - **Payback Period** = (Implementation Cost / Net Gain) × 12 months
+        
+        **Key Assumptions:**
+        - Implementation cost is 10% of Year 1 net gain
+        - Revenue metrics compound at 12% annually
+        - Cost savings are realized in Year 1
+        - Payback assumes linear monthly revenue recognition
+        """)
+    
     st.stop()
 
 # Implementation Roadmap page
 if page == "Implementation Roadmap":
-    st.header("Step 5: Data-Driven Implementation Roadmap")
+    show_progress_steps(5)
+    
+    st.markdown("### 🗺️ Step 5: Implementation Roadmap")
+    st.markdown("*Phased deployment strategy calibrated to your customer data and business objectives*")
+    
     if not st.session_state.analysis:
-        st.warning("Run the Home Input step first.")
+        st.error("❌ Please run the Home Input analysis first.", icon="❌")
         st.stop()
 
     analysis = st.session_state.analysis
     df = analysis['df']
+    st.divider()
     
     st.markdown("""
     ## 🗺️ Strategic Deployment Timeline
