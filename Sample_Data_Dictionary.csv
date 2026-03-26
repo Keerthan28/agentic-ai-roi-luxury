@@ -1,0 +1,67 @@
+feature_name,feature_description,datatype
+df_cc_id,Unique Idendifier of each row,Number
+efx_affluence_index,"The Affluence Index - Provides a household-level continuous score ranging from 1 to 1,000, with a rating of 1,000 representing the highest estimated level of spending power.",Number
+efx_financial_durability_index,"Provides a household-level score continuous score of 1-1000  (1000 represents highest economic capacity and financial resilience) Segment households by economic capacity and Targeting for prospecting, cross-sell, or upsell.",Number
+efx_total_income360,"Dollar Value of Total Income (e.g. 175000, Total Annual, Household Income = (Salary_Income360 + NonSalary_Income360)",Number
+efx_salary_income360,"Income360 Salary - Dollar Value of Wage & Salary Income (e.g. 100000 = $100,000 Dollars)",Number
+efx_non_salary_income360,"Income360 NonSalary - Dollar Value of NonSalary Income (Investments, Business, and Retirement) (e.g. 75000 = $75,000 Dollars)",Number
+spd_income_sd_plus_v3,Income predictor Score (in $'000),Number
+spd_wealth_sd_plus_v4,SD Net Worth Model ($000s). Designed for Financial Services Advertising (FSA),Number
+spd_investor_sd_plus_v5_checking,Investable Taxable Assets - Checking Accounts Predictor Score ($000s). Designed for Financial Services Advertising (FSA),Number
+spd_investor_sd_plus_v5_savings,Investable Taxable Assets - Savings/IMMA/CD Predictor Score ($000s). Designed for Financial Services Advertising (FSA),Number
+spd_spendex_plus_v3,Discretionary Spending Predictor Score ($). Designed for Financial Services Advertising (FSA),Number
+exp_estimated_household_income_amount_v6,Estimated Household Income Amount V6: Total estimated income for a living unit incorporating several highly predictive individual and household level variables. Multiple statistical methodologies are used to predict the income estimate for the living unit. Values=001-250; in thousands. 000=Unknown,Number
+spd_bc_1st_contact_email,This element predicts an individual's level of preference towards email as the initial contact channel when learning about new products/services (7= high preference for email; 1 = low preference for email). | RANGE: 1 to 7,Number
+spd_bc_content_infographic,This element predicts an individual's level of preference for infographics when learning about new products/services on a scale from 1 to 7 (7=high level of preference for infographics; 1=low level of preference for infographics; 0=not applicable). | RANGE: 0 to 7,Number
+spd_bc_content_video,This element predicts an individual's level of preference for videos when learning about new products/services on a scale from 1 to 7 (7=high level of preference for videos; 1=low level of preference for videos; 0=not applicable). | RANGE: 0 to 7,Number
+spd_channel_sd_banner_scale,Likelihood of Responding to a Banner Ad (7=most likely to respond)),Number
+spd_channel_sd_intertv_scale,Likelihood of Responding to an Interactive TV Offer (7=most likely to respond),Number
+spd_scr_email_dynabase,Email Open Propensity v2 - 0 (least likely to be opened) to 999 (most likely to be opened),Number
+spd_bc_decision_maker,This element indicates the likelihood that an individual is a decision maker within their organization on a scale from 1 to 7 (7=highly likely; 1=highly unlikely). | RANGE: 1 to 7,Number
+spd_bc_loc_hbb_office,This element predicts the likelihood that an individual's primary work location is a home-based office. | RANGE: 0 to 7,Number
+spd_bc_prof_c_level,"This element predicts the likelihood that an individual has a C-Level title like CEO, CFO, CMO, etc. at their job on a scale from 0 to 7 (7=most likely; 1=least likely; 0=not applicable). | RANGE: 0 to 7",Number
+spd_bc_prof_manager,"This element predicts the likelihood that an individual has a manager title like Group Manager, Senior Manager, Manager, Product Manager, etc. at their job on a scale from 0 to 7 (7=most likely; 1=least likely; 0=not applicable). | RANGE: 0 to 7",Number
+spd_bc_prof_staff,"This element predicts the likelihood that an individual has a staff title like Assistant, Associate, Analyst, etc. at their job on a scale from 0 to 7 (7=most likely; 1=least likely; 0=not applicable). | RANGE: 0 to 7",Number
+spd_jobs_sd_blue_collar,Likelihood That Person's Occupation is Blue Collar (1=least likely; 7=definitely),Number
+spd_jobs_sd_corp_leader,Likelihood That Person's Occupation is a Corporate Leader (1=least likely; 7=definitely),Number
+spd_jobs_sd_homemaker,Likelihood That Person's Occupation is a Homemaker (1=least likely; 7=definitely),Number
+spd_jobs_sd_middle_mgmt,Likelihood That Person's Occupation is in Middle Management (1=least likely; 7=definitely),Number
+spd_jobs_sd_retired,Likelihood That Person's Occupation is Retired (1=least likely; 7=definitely),Number
+spd_jobs_sd_student,Likelihood That Person's Occupation is Full-Time Student (1-least likely; 7=definitely),Number
+spd_sd_employment,Employment Status (1-3=most likely unemployed; 4=most likely part-time; 5-7= most likely full-time),Number
+spd_bc_purchase_price,This element predicts the level of importance placed on the price of a product/service when making a purchase decision. (7 = very price sensitive; 1 = not price sensitive) | RANGE: 1 to 7,Number
+spd_bc_purchase_quality,This element predicts the level of importance placed on the quality of a product/service when making a purchase decision. (7 = high importance placed on quality; 1 = low performance placed on quality) | RANGE: 1 to 7,Number
+spd_generations_in_hh,Number of Generations in Household,Number
+spd_sd_children_in_hh_v2,Number of Children in Household,Number
+spd_lt_senior_adult_in_hh_v2,Likelihood of a Senior Adult in HH (7=most likely; 1=least likely),Number
+spd_sd_lor_v2,Length of Current Residence,Number
+exp_financial_cc_revolve_pay_min,"Financial: CC Revolve Pay Min: Household is likely to only pay their minimum credit card balance. Based on consumers reporting they only pay the minimum on their credit card balance. Values 1-10, 1=highest likely.",Number
+exp_financial_corporate_credit_card_user,"Financial: Corporate Credit Card User: Indicates households likelihood to include corporate credit card users. Based on the statistical analysis of consumers that have reported to use corporate credit cards. Values 1-99, 1=highest likelihood. Values 01-09, Top Ranked Values 10-19 Values 20-29 Values 30-39 Values 40-49 Values 50-59Values 60-69 Values 70-79 Values 80-89 Values 90-99, Bottom RankedValues 00, Unknown",Number
+exp_financial_credit_card_user,"Financial: Credit Card User: Indicates households likelihood to frequent credit card users. Based on the statistical analysis of consumers that have reported to use credit cards 20+ times each month. Values 1-99, 1=highest likelihood. Values 01-09, Top Ranked Values 10-19 Values 20-29 Values 30-39 Values 40-49 Values 50-59Values 60-69 Values 70-79 Values 80-89 Values 90-99, Bottom RankedValues 00, Unknown",Number
+exp_financial_major_credit_card_user,"Financial: Major Credit Card User: Indicates households likelihood to include frequent major credit card users. Based on the statistical analysis of consumers that have reported to use major credit cards 6+ times each month. Values 1-99, 1=highest likelihood. Values 01-09, Top Ranked Values 10-19 Values 20-29 Values 30-39 Values 40-49 Values 50-59Values 60-69 Values 70-79 Values 80-89 Values 90-99, Bottom RankedValues 00, Unknown",Number
+exp_financial_premium_credit_card_user,"Financial: Premium Credit Card User: Indicates households likely to include frequent premium credit card users. Based on a statistical analysis of consumers reporting use of premium credit cards 6+ times each month. Values 1-99, 1=highest likelihood. Values 01-09, Top Ranked Values; 10-19 values, 20-29 values continuing through values 80-89; values 90-99, Bottom Ranked Tier. 00=Unknown",Number
+exp_invest_active_investor,"Invest: Active Investor: Indicates households likelihood to include active investors. Based on the statistical analysis of consumers that have reported to have investments of 100K+. Values 1-99, 1=highest likelihood. Values 01-09, Top Ranked Values 10-19 Values 20-29 Values 30-39 Values 40-49 Values 50-59Values 60-69 Values 70-79 Values 80-89 Values 90-99, Bottom RankedValues 00, Unknown",Number
+exp_invest_investor_mid_value,"Invest: Investor Mid-value: Household likely includes emerging investor with mid-range investment value. Based on consumers reporting to be an emerging investor with mid-range investment value. Values 1-10, 1=highest likely.",Number
+spd_home_purchase_price,Home Purchase Price. Designed for Financial Services Advertising (FSA),Number
+spd_mortgage_amount,Starting Amount of Most Recent Mortgage (in $'000). Designed for Financial Services Advertising (FSA),Number
+spd_home_to_income_ratio,Ratio of Home Value to Annual Income,Number
+spd_spendex_donation_v3,Spendex Category - Amount of Discretionary Income Spent on Donations ($). Designed for Financial Services Advertising (FSA),Number
+spd_charity_sd_highdollar_v2,"Likelihood of Donating over $1,000 to Charitable Organizations within the Past 12 Months (1=least likely; 7=most likely)",Number
+spd_purch_prod_comp_quality,Likelihood of Purchasing Based on Company reputation or the Quality of the Product (1=least likely; 7=most likely),Number
+spd_young_kids,People have kids of age 0 to 2,Number
+spd_elementry_school_kids,People have kids of age 3 to 10,Number
+spd_parent_of_a_teenager,People have kids of age 11 to 17,Number
+spd_investments_v2,Likely to Have Long Term Investments where 1 is yes and 0 is no,Number
+spd_bc_contact_orient_v2,"The element indicates an individual's preferred initial contact channel when being contacted about new products or services. Channels include 1 for phone, 2 for  in person, 3 for email, 4 for linkedin, 5 for twitter, 0 for others",Number
+spd_presence_of_children_v2,Presence of Children where 1 is yes and 0 is no,Number
+spd_young_adult_in_hh_v2,Likely to Have Non-Head of Household 18-25 Year Old in Household where 1 is yes and 0 is no,Number
+spd_sd_education_v2,"Education Level of Individual as 1 as less than hs, 2 as hs, 3 as bachelor degree, 4 as grad degree",Number
+spd_sd_gender,"Gender of Individual where 1 as female, 2 as male and 0 as others",Number
+exp_fin_seg_credit_card_paydowns,"Fin Seg: Credit Card Paydowns: Indicates consumers who are likely paying down their credit card balances. Based on statistical analysis of that are paying down credit card balances. Values: 1 = Tier 1 (Top ranked), 2 = Tier 2, 3 = Tier 3, 4 = Tier 4, 5 = Tier 5,  6 = others",Number
+exp_fin_seg_credit_card_surfers,"Fin Seg: Credit Card Surfers: Indicates consumers who are considered credit card rate surfers and are likely to transfer their credit card balances to avoid paying interest. Based on statistical analysis of that are considered rate surfers. Values: 1 = Tier 1 (Top ranked), 2 = Tier 2, 3 = Tier 3, 4 = Tier 4, 5 = Tier 5,  6 = others",Number
+spd_sd_homeowner_prob_v2,"SD Homeowner Probability Model. Designed for Financial Services Advertising (FSA) where 1 is rentaters iniatls , 2 is renters finalised, 3 is householders initals, 4 is householders finals or else 5",Number
+urbanicity,"This represents urbanacity where 1 for urban, 2 for suburban and 3 for rural",Number
+propensity_spend_on_digital_media_flag,Likelihood for a digital media spend where 1 is yes and 0 is no,Number
+propensity_spend_online_commerce_flag,Likelihood for an online ecommerce platforms spend where 1 is yes and 0 is no,Number
+spd_regb_fintech_mwallet_v2,Likelihood of Being Interested in Using Mobile Wallets  (1=least likely; 7=most likely). Designed for Financial Services Advertising (FSA),Number
+exp_fin_payment_uses_apple_pay,"Fin: Payment Uses Apple Pay: Built on the statistical analysis of industry leading ConsumerView Marketing database, FLA Friendly Financial Audiences have been created with compliance in mind and without use of individual consumer credit data and or other prohibited characteristics that could be construed as discriminatory. Predicts likelihood to use Apple Pay as payment method.",Number

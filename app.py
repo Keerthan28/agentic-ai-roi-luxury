@@ -2187,3 +2187,7 @@ if page == "Implementation Roadmap":
 
 # End of new navigation pages
 # (Legacy tabs replaced by new sidebar workflow — all rendered above)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 67204c1 (Add data files and documentation for deployment)
