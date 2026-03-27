@@ -1,5 +1,5 @@
 """
-Agentic AI ROI Dashboard — Luxury Goods Industry
+LuxeAgentic: Strategic ROI Engine — Luxury Goods Industry
 Streamlit app with interactive OSINT parameter sliders and live ROI projections.
 Enhanced UI for beautiful and intuitive experience.
 """
@@ -29,7 +29,7 @@ from model.pipeline import (
 # ── Page config ───────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Agentic AI ROI — Luxury Goods",
+    page_title="LuxeAgentic: Strategic ROI Engine",
     page_icon="💎",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -571,7 +571,7 @@ df_real = engineer_features_from_csv(df_real_raw)
 
 st.markdown("""
 <div style="text-align: center; padding: 2rem 0;">
-    <h1 style="font-size: 2.2rem; margin: 0; color: #C41E3A;">💎 Agentic AI ROI Dashboard</h1>
+    <h1 style="font-size: 2.2rem; margin: 0; color: #C41E3A;">💎 LuxeAgentic: Strategic ROI Engine</h1>
     <p style="font-size: 1.1rem; color: #666; margin-top: 0.5rem;">Luxury Goods Industry Intelligence & ROI Analytics</p>
     <p style="font-size: 0.9rem; color: #999;">Interactive consulting for luxury brands: Segmentation → Use Case Match → ROI → Roadmap</p>
 </div>
@@ -1211,7 +1211,7 @@ if page == "Home Input":
     # Help section
     with st.expander("❓ How to Use This Dashboard", expanded=False):
         st.markdown("""
-        **Welcome to the Agentic AI ROI Dashboard!**
+        **Welcome to the LuxeAgentic: Strategic ROI Engine!**
         
         This interactive tool helps luxury brands understand the impact of AI-powered customer operations.
         
