@@ -9,3 +9,8 @@ openpyxl
 plotly
 joblib
 altair>=5
+boto3
+fpdf2
+python-docx
+python-pptx
+duckduckgo-search

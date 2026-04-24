@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.DS_Store
+.ipynb_checkpoints/
+model/__pycache__/
+*.png
+*.ipynb
+roi_model_results.csv
+agentic_ai_roi_model.py
+run_model_on_real_data.py

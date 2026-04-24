@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing / packaging
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Env / IDE
+.env
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Large / regenerated outputs
+# Uncomment if you don't want to commit results
+# results/*.png
+# results/*.csv
+
+# Raw survey data (NEVER commit)
+data/*.xlsx
+data/*.csv
+!data/data-access.md
